@@ -7,9 +7,9 @@
 # General application configuration
 import Config
 
-config :invoice,
-  ecto_repos: [Invoice.Repo],
-  generators: [timestamp_type: :utc_datetime]
+# config :invoice,
+#   ecto_repos: [Invoice.Repo],
+#   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :invoice, InvoiceWeb.Endpoint,
