@@ -1,7 +1,7 @@
 # ========================
 # 1. Build Stage
 # ========================
-FROM hexpm/elixir:1.19.3-erlang-26.1-debian-bullseye-20251117-slim AS build
+FROM hexpm/elixir:1.17.3-erlang-27.1.2-debian-bullseye-20241111-slim AS build
 
 # Install build tools
 RUN apt-get update && apt-get install -y \
