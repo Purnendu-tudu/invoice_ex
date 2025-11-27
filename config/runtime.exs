@@ -50,7 +50,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("RENDER_EXTERNAL_HOSTNAME") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "1000")
 
   config :invoice, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
@@ -66,7 +66,8 @@ if config_env() == :prod do
       port: port
     ],
     check_origin: [
-      "//#{host}"
+      "//#{host}",     # Allows secure (https) and insecure (http) requests from the host
+      "//#{host}:#{port}" # Allows requests to the internal port if needed
     ],
     secret_key_base: secret_key_base
 
