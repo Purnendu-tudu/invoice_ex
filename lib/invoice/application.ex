@@ -9,7 +9,7 @@ defmodule Invoice.Application do
   def start(_type, _args) do
     children = [
       InvoiceWeb.Telemetry,
-      Invoice.Repo,
+      # Invoice.Repo,
       {DNSCluster, query: Application.get_env(:invoice, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Invoice.PubSub},
       # Start a worker by calling: Invoice.Worker.start_link(arg)
