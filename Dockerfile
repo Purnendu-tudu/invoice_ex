@@ -1,32 +1,50 @@
-# 1. Build stage
-FROM hexpm/elixir:1.17.2-erlang-27.0-debian-bookworm-20240612 AS build
+# ========================
+# 1. Build Stage
+# ========================
+FROM hexpm/elixir:1.17.3-erlang-27.1-debian-bookworm-20240812 AS build
 
+# Install build tools
 RUN apt-get update && apt-get install -y build-essential git nodejs npm
+
+# Install hex and rebar
+RUN mix local.hex --force && mix local.rebar --force
 
 WORKDIR /app
 
-# Install Hex + Rebar
-RUN mix local.hex --force && mix local.rebar --force
+# Copy mix files first (cache deps)
+COPY mix.exs mix.lock ./
+COPY config config/
 
-# Copy project files
+RUN mix deps.get --only prod
+RUN mix deps.compile
+
+# Copy assets
+COPY assets assets
+RUN npm --prefix ./assets install
+RUN npm --prefix ./assets run build
+
+# Copy the whole project
 COPY . .
 
-# Install deps
-RUN mix deps.get
-RUN npm install --prefix assets
-RUN npm run build --prefix assets
+RUN MIX_ENV=prod mix compile
+
+# Build Phoenix release
 RUN MIX_ENV=prod mix release
 
-# 2. Run stage
-FROM debian:bookworm-slim AS app
-RUN apt-get update && apt-get install -y openssl libncurses5 locales && rm -rf /var/lib/apt/lists/*
+# ========================
+# 2. Runtime Stage
+# ========================
+FROM debian:bookworm-20240812-slim AS runtime
 
-ENV LANG=en_US.UTF-8
+RUN apt-get update && apt-get install -y openssl libstdc++6
 
 WORKDIR /app
 
 COPY --from=build /app/_build/prod/rel/* ./
 
+# Runtime ENV
+ENV HOME=/app
+ENV MIX_ENV=prod
 ENV PHX_SERVER=true
 
 CMD ["bin/invoice", "start"]
