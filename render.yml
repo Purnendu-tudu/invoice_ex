@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: phoenix-app
+    env: docker
+    region: singapore
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phoenix-db
+          property: connectionString
+
+databases:
+  - name: phoenix-db
+    plan: free
+    region: singapore
