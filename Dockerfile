@@ -1,10 +1,15 @@
 # ========================
 # 1. Build Stage
 # ========================
-FROM hexpm/elixir:1.10.2-erlang-22.2.8-alpine-3.11.3 AS build
+FROM hexpm/elixir:1.17.3-erlang-27.1-debian-bookworm AS build
 
 # Install build tools
-RUN apt-get update && apt-get install -y build-essential git nodejs npm
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    curl \
+    nodejs \
+    npm
 
 # Install hex and rebar
 RUN mix local.hex --force && mix local.rebar --force
@@ -18,12 +23,12 @@ COPY config config/
 RUN mix deps.get --only prod
 RUN mix deps.compile
 
-# Copy assets
+# Build assets
 COPY assets assets
 RUN npm --prefix ./assets install
 RUN npm --prefix ./assets run build
 
-# Copy the whole project
+# Copy the rest
 COPY . .
 
 RUN MIX_ENV=prod mix compile
@@ -34,13 +39,14 @@ RUN MIX_ENV=prod mix release
 # ========================
 # 2. Runtime Stage
 # ========================
-FROM debian:bookworm-20240812-slim AS runtime
+FROM debian:bookworm-slim AS runtime
 
 RUN apt-get update && apt-get install -y openssl libstdc++6
 
 WORKDIR /app
 
-COPY --from=build /app/_build/prod/rel/* ./
+# Copy release
+COPY --from=build /app/_build/prod/rel/invoice ./
 
 # Runtime ENV
 ENV HOME=/app
