@@ -1,7 +1,7 @@
 # ========================
 # 1. Build Stage
 # ========================
-FROM hexpm/elixir:1.17.3-erlang-27.1-debian-bookworm-20240812 AS build
+FROM hexpm/elixir:1.10.2-erlang-22.2.8-alpine-3.11.3 AS build
 
 # Install build tools
 RUN apt-get update && apt-get install -y build-essential git nodejs npm
